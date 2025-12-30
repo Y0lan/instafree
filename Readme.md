@@ -2,6 +2,17 @@
 
 A patching toolkit that removes addictive features from Instagram while keeping essential functionality.
 
+I built this project for myself as an alternative to [DFInstagram](https://www.distractionfreeapps.com/) which hasn't been maintained for a long time and was difficult to update. I'm sharing it so others can do the same for themselves.
+
+**This project is entirely free and open-source.** Feel free to fork, copy, enhance, or submit pull requests - do whatever you want with it!
+
+## Installation
+
+You have two options:
+
+1. **Ready-to-install APK** - Grab the latest patched APK from the [Releases](../../releases) page and install it directly
+2. **DIY Patching** - Use the toolkit below to patch any Instagram version yourself
+
 ## What Gets Disabled
 
 | Feature | Status | How |
@@ -121,6 +132,15 @@ Hooks into `TigonServiceLayer` (a named, non-obfuscated class) and blocks reques
 3. Apply the same patches.
 
 
+## Contributing
+
+This is a personal project I'm sharing with the community. Contributions are welcome!
+
+- 🍴 **Fork it** - Make your own version
+- 🔧 **Pull requests** - Improvements and fixes are appreciated
+- 📋 **Copy it** - Use the code however you want
+- ✨ **Enhance it** - Build something even better
+
 ## License
 
-For educational purposes of course.
+This project is released under the Unlicense - you can do whatever you want with it. See [LICENSE](LICENSE) for details.
