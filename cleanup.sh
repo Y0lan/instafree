@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# Feurstagram Cleanup Script
+# FeurStagram Cleanup Script
 # Removes all generated files after patching
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-echo "Cleaning up Feurstagram build artifacts..."
+echo "Cleaning up FeurStagram build artifacts..."
 
 # Remove decompiled source
 rm -rf "$SCRIPT_DIR/instagram_source"

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Feurstagram Patcher
+# FeurStagram Patcher
 # Patches an Instagram APK to create a distraction-free version
 #
 # Usage: ./patch.sh <instagram.apk>
@@ -101,8 +101,8 @@ patch_apk() {
     apktool d --no-res "$INPUT_APK" -o "$WORK_DIR"
     echo -e "${GREEN}✓ Decompiled${NC}"
     
-    # Step 2: Copy Feurstagram helper classes
-    echo -e "\n${YELLOW}[2/6] Adding Feurstagram classes...${NC}"
+    # Step 2: Copy FeurStagram helper classes
+    echo -e "\n${YELLOW}[2/6] Adding FeurStagram classes...${NC}"
     mkdir -p "$WORK_DIR/smali_classes17/com/feurstagram"
     cp "$PATCHES_DIR/FeurConfig.smali" "$WORK_DIR/smali_classes17/com/feurstagram/"
     cp "$PATCHES_DIR/FeurHooks.smali" "$WORK_DIR/smali_classes17/com/feurstagram/"

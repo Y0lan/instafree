@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="docs/app_icon.png" alt="Feurstagram Icon" width="128">
+  <img src="docs/app_icon.png" alt="FeurStagram Icon" width="128">
 </p>
 
-<h1 align="center">Feurstagram</h1>
+<h1 align="center">FeurStagram</h1>
 <p align="center">Distraction-Free Instagram</p>
 
 <p align="center">

@@ -1,7 +1,7 @@
 .class public Lcom/feurstagram/FeurConfig;
 .super Ljava/lang/Object;
 
-# Feurstagram Configuration
+# FeurStagram Configuration
 # Hardcoded settings for distraction-free mode
 # 
 # Disables: Feed content, Explore tab, Reels tab
