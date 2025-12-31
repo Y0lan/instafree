@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/app_icon.png" alt="Feurstagram Icon" width="128">
+</p>
+
 # Feurstagram - Distraction-Free Instagram
 
 A patching toolkit that removes addictive features from Instagram while keeping essential functionality.
