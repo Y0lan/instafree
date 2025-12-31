@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feurstagram - Distraction-Free Instagram</title>
+
+    <!-- SEO Meta Tags -->
+    <meta name="description"
+        content="Feurstagram removes addictive features from Instagram. Block the feed, explore, and reels while keeping stories, DMs, and profiles. Free and open-source.">
+    <meta name="keywords"
+        content="Instagram, distraction-free, focus, productivity, no feed, block reels, Android, APK, open source">
+    <meta name="author" content="jean-voila">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://jean-voila.github.io/FeurStagram/">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://jean-voila.github.io/FeurStagram/">
+    <meta property="og:title" content="Feurstagram - Distraction-Free Instagram">
+    <meta property="og:description"
+        content="Remove addictive features from Instagram. Keep messaging, stories, and profiles — block the endless feed.">
+    <meta property="og:image" content="https://jean-voila.github.io/FeurStagram/app_icon.png">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:url" content="https://jean-voila.github.io/FeurStagram/">
+    <meta name="twitter:title" content="Feurstagram - Distraction-Free Instagram">
+    <meta name="twitter:description"
+        content="Remove addictive features from Instagram. Keep messaging, stories, and profiles — block the endless feed.">
+    <meta name="twitter:image" content="https://jean-voila.github.io/FeurStagram/app_icon.png">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="app_icon.png">
+    <link rel="apple-touch-icon" href="app_icon.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #000000;
+            --bg-secondary: #0a0a0a;
+            --bg-tertiary: #141414;
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --text-tertiary: rgba(255, 255, 255, 0.5);
+            --accent: #10a37f;
+            --accent-hover: #1a7f64;
+            --border: rgba(255, 255, 255, 0.1);
+            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Subtle animated gradient background */
+        .bg-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(ellipse 80% 50% at 50% -20%, rgba(120, 119, 198, 0.15), transparent),
+                radial-gradient(ellipse 60% 40% at 80% 50%, rgba(255, 99, 132, 0.08), transparent),
+                radial-gradient(ellipse 50% 30% at 20% 80%, rgba(16, 163, 127, 0.1), transparent);
+            pointer-events: none;
+            z-index: 0;
+            animation: gradientMove 20s ease-in-out infinite;
+            background-size: 200% 200%;
+        }
+
+        @keyframes gradientMove {
+
+            0%,
+            100% {
+                background-position: 0% 0%;
+                filter: hue-rotate(0deg);
+            }
+
+            25% {
+                background-position: 100% 50%;
+            }
+
+            50% {
+                background-position: 50% 100%;
+                filter: hue-rotate(30deg);
+            }
+
+            75% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 80px 24px;
+        }
+
+        .app-icon {
+            width: 120px;
+            height: 120px;
+            border-radius: 28px;
+            margin-bottom: 32px;
+            box-shadow:
+                0 20px 40px rgba(0, 0, 0, 0.4),
+                0 0 0 1px rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            will-change: transform;
+            user-select: none;
+            -webkit-user-drag: none;
+            pointer-events: none;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 8vw, 4.5rem);
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            margin-bottom: 16px;
+            background: linear-gradient(180deg, #fff 0%, rgba(255, 255, 255, 0.8) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero .tagline {
+            font-size: clamp(1.1rem, 3vw, 1.5rem);
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin-bottom: 48px;
+            font-weight: 400;
+        }
+
+        /* Buttons */
+        .button-group {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 28px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: var(--text-primary);
+            color: var(--bg-primary);
+        }
+
+        .btn-primary:hover {
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .developed-by {
+            margin-top: 24px;
+            color: var(--text-tertiary);
+            font-size: 0.875rem;
+        }
+
+        .developed-by a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .developed-by a:hover {
+            color: var(--text-primary);
+        }
+
+        /* Features Section */
+        .features {
+            padding: 80px 0 120px;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 64px;
+        }
+
+        .section-header h2 {
+            font-size: clamp(1.75rem, 4vw, 2.5rem);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 16px;
+        }
+
+        .section-header p {
+            color: var(--text-secondary);
+            font-size: 1.125rem;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        .feature-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            will-change: transform;
+            cursor: default;
+        }
+
+        .feature-card:hover {
+            background: var(--bg-tertiary);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .feature-icon.blocked {
+            background: rgba(239, 68, 68, 0.15);
+        }
+
+        .feature-icon.enabled {
+            background: rgba(16, 163, 127, 0.15);
+        }
+
+        .feature-card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .feature-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 12px;
+        }
+
+        .status-badge.blocked {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+        }
+
+        .status-badge.enabled {
+            background: rgba(16, 163, 127, 0.15);
+            color: #34d399;
+        }
+
+        /* Footer */
+        footer {
+            padding: 40px 24px;
+            text-align: center;
+            border-top: 1px solid var(--border);
+        }
+
+        footer p {
+            color: var(--text-tertiary);
+            font-size: 0.875rem;
+        }
+
+        footer a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        footer a:hover {
+            color: var(--text-primary);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 640px) {
+            .hero {
+                padding: 60px 20px;
+            }
+
+            .app-icon {
+                width: 96px;
+                height: 96px;
+                border-radius: 22px;
+            }
+
+            .button-group {
+                flex-direction: column;
+                width: 100%;
+                max-width: 320px;
+            }
+
+            .btn {
+                justify-content: center;
+                width: 100%;
+            }
+
+            .feature-card {
+                padding: 24px;
+            }
+        }
+
+        /* Smooth scroll */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Selection */
+        ::selection {
+            background: rgba(16, 163, 127, 0.3);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-gradient"></div>
+
+    <main>
+        <section class="hero">
+            <img src="app_icon.png" alt="Feurstagram Icon" class="app-icon" draggable="false">
+            <h1>Feurstagram</h1>
+            <p class="tagline">Distraction-Free Instagram. Keep messaging, stories, and profiles — remove the endless
+                feed.</p>
+
+            <div class="button-group">
+                <a href="https://github.com/jean-voila/FeurStagram/releases/download/v410-1-0-63-71/feurstagram-410-1-0-63-71.apk"
+                    class="btn btn-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 16l-6-6h4V4h4v6h4l-6 6zm-8 2h16v2H4v-2z" />
+                    </svg>
+                    Download APK
+                </a>
+                <a href="https://github.com/jean-voila/FeurStagram" class="btn btn-secondary" target="_blank"
+                    rel="noopener">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                    </svg>
+                    Source Code
+                </a>
+            </div>
+            <p class="developed-by">Developed with ♥ by <a href="https://github.com/jean-voila" target="_blank"
+                    rel="noopener">jean-voila</a></p>
+        </section>
+
+        <section class="features container">
+            <div class="section-header">
+                <h2>What changes?</h2>
+                <p>Keep what matters, remove what distracts</p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon blocked">❌</div>
+                    <span class="status-badge blocked">Blocked</span>
+                    <h3>Feed Posts</h3>
+                    <p>The endless home feed is blocked at the network level. No more doomscrolling.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon blocked">❌</div>
+                    <span class="status-badge blocked">Redirected</span>
+                    <h3>Explore Tab</h3>
+                    <p>Tapping Explore redirects you straight to your DMs instead.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon blocked">❌</div>
+                    <span class="status-badge blocked">Redirected</span>
+                    <h3>Reels Tab</h3>
+                    <p>The Reels tab is also redirected to DMs. No infinite video loops.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon enabled">✓</div>
+                    <span class="status-badge enabled">Works</span>
+                    <h3>Stories</h3>
+                    <p>View and post stories from the people you follow.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon enabled">✓</div>
+                    <span class="status-badge enabled">Works</span>
+                    <h3>Direct Messages</h3>
+                    <p>Full messaging functionality including shared reels and posts.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon enabled">✓</div>
+                    <span class="status-badge enabled">Works</span>
+                    <h3>Profile & Search</h3>
+                    <p>Access your profile, search for users, and get notifications.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>
+            Free and open-source. Made by <a href="https://github.com/jean-voila" target="_blank"
+                rel="noopener">jean-voila</a>
+        </p>
+    </footer>
+
+    <script>
+        // 3D Tilt Effect
+        function initTilt(element, intensity = 15) {
+            element.style.transformStyle = 'preserve-3d';
+            element.style.transition = 'transform 0.1s ease-out';
+
+            element.addEventListener('mousemove', (e) => {
+                const rect = element.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+
+                const rotateX = ((y - centerY) / centerY) * -intensity;
+                const rotateY = ((x - centerX) / centerX) * intensity;
+
+                element.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+            });
+
+            element.addEventListener('mouseleave', () => {
+                element.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+            });
+        }
+
+        // Apply to feature cards
+        document.querySelectorAll('.feature-card').forEach(card => {
+            initTilt(card, 8);
+        });
+    </script>
+</body>
+
+</html>
