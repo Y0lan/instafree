@@ -4,7 +4,7 @@
 # FeurStagram Configuration
 # Hardcoded settings for distraction-free mode
 # 
-# Disables: Feed content, Explore tab, Reels tab
+# Disables: Feed content, Explore content, Reels content
 # Keeps: Stories, DMs, Profile
 
 .method public constructor <init>()V
@@ -15,20 +15,6 @@
 
 # Returns true if feed content should be disabled
 .method public static isFeedDisabled()Z
-    .locals 1
-    const/4 v0, 0x1
-    return v0
-.end method
-
-# Returns true if Explore tab should be disabled
-.method public static isExploreDisabled()Z
-    .locals 1
-    const/4 v0, 0x1
-    return v0
-.end method
-
-# Returns true if Reels tab should be disabled
-.method public static isReelsDisabled()Z
     .locals 1
     const/4 v0, 0x1
     return v0

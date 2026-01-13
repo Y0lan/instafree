@@ -108,34 +108,8 @@ patch_apk() {
     cp "$PATCHES_DIR/FeurHooks.smali" "$WORK_DIR/smali_classes17/com/feurstagram/"
     echo -e "${GREEN}✓ Added FeurConfig.smali and FeurHooks.smali${NC}"
     
-    # Step 3: Find and patch IgTabHostFragmentFactory
-    echo -e "\n${YELLOW}[3/6] Patching tab navigation...${NC}"
-    local TAB_FACTORY=""
-    for f in $(grep -rl '"fragment_clips"' "$WORK_DIR/smali_classes2/X/" 2>/dev/null); do
-        if grep -q 'move-object/from16 v3, p2' "$f" 2>/dev/null; then
-            TAB_FACTORY="$f"
-            break
-        fi
-    done
-    if [ -z "$TAB_FACTORY" ]; then
-        for f in $(grep -rl '"fragment_clips"' "$WORK_DIR/smali"*/ | grep -v "InstagramMainActivity"); do
-            if grep -q 'move-object/from16.*p2' "$f" 2>/dev/null; then
-                TAB_FACTORY="$f"
-                break
-            fi
-        done
-    fi
-    if [ -z "$TAB_FACTORY" ]; then
-        echo -e "${RED}Error: Could not find IgTabHostFragmentFactory${NC}"
-        exit 1
-    fi
-    echo "  Found: $TAB_FACTORY"
-    
-    python3 "$SCRIPT_DIR/apply_tab_patch.py" "$TAB_FACTORY"
-    echo -e "${GREEN}✓ Tab redirect patch applied${NC}"
-    
-    # Step 4: Patch TigonServiceLayer for network blocking
-    echo -e "\n${YELLOW}[4/6] Patching network layer...${NC}"
+    # Step 3: Patch network layer...
+    echo -e "\n${YELLOW}[3/6] Patching network layer...${NC}"
     local TIGON_FILE="$WORK_DIR/smali/com/instagram/api/tigon/TigonServiceLayer.smali"
     if [ ! -f "$TIGON_FILE" ]; then
         echo -e "${RED}Error: TigonServiceLayer.smali not found${NC}"
@@ -144,6 +118,11 @@ patch_apk() {
     
     python3 "$SCRIPT_DIR/apply_network_patch.py" "$TIGON_FILE"
     echo -e "${GREEN}✓ Network hook patch applied${NC}"
+
+    # Step 4: Patch tab redirection
+    echo -e "\n${YELLOW}[4/6] Patching tab redirection (Global)...${NC}"
+    python3 "$SCRIPT_DIR/global_redirect.py" "$WORK_DIR"
+    echo -e "${GREEN}✓ Global tab redirection applied${NC}"
     
     # Step 5: Build APK
     echo -e "\n${YELLOW}[5/6] Building APK...${NC}"
@@ -173,10 +152,10 @@ usage() {
     echo ""
     echo "Patches an Instagram APK to create Feurstagram (Distraction-Free Instagram)"
     echo ""
-    echo "Features disabled:"
+    echo "Features disabled (via network blocking):"
     echo "  - Feed posts (Stories remain visible)"
-    echo "  - Explore tab (redirects to DMs)"
-    echo "  - Reels tab (redirects to DMs)"
+    echo "  - Explore content"
+    echo "  - Reels content"
     echo ""
     echo "Features preserved:"
     echo "  - Stories"

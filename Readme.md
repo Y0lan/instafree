@@ -35,13 +35,13 @@ You have two options:
 | Feature | Status | How |
 |---------|--------|-----|
 | **Feed Posts** | ❌ Blocked | Network-level blocking |
-| **Explore Tab** | ❌ Redirected | Redirects to DMs |
-| **Reels Tab** | ❌ Redirected | Redirects to DMs |
+| **Explore Content** | ❌ Blocked | Network-level blocking |
+| **Reels Content** | ❌ Redirected | Redirects to DMs |
 
 ## What Still Works
 
 | Feature | Status |
-|---------|--------|
+|---------|--------|--------|
 | **Stories** | ✅ Works |
 | **Direct Messages** | ✅ Works |
 | **Profile** | ✅ Works |
@@ -59,7 +59,7 @@ sudo apt install apktool android-sdk-build-tools openjdk-17-jdk python3
 ### macOS
 ```bash
 brew install apktool android-commandlinetools openjdk python3
-sdkmanager "build-tools;34.0.0"
+ sdkmanager "build-tools;34.0.0"
 ```
 
 ## Quick Start
@@ -87,7 +87,6 @@ sdkmanager "build-tools;34.0.0"
 Feurstagram/
 ├── patch.sh                 # Main patching script
 ├── cleanup.sh               # Removes build artifacts
-├── apply_tab_patch.py       # Tab redirect patch logic
 ├── apply_network_patch.py   # Network hook patch logic
 ├── feurstagram.keystore     # Signing keystore (password: android)
 └── patches/
@@ -132,25 +131,18 @@ adb logcat -s "Feurstagram:D"
 ## How It Works
 
 ### Tab Redirect
-Intercepts fragment loading in `IgTabHostFragmentFactory`. When Instagram tries to load `fragment_clips` (Reels) or `fragment_search` (Explore), it redirects to `fragment_direct_tab` (DMs).
+Intercepts fragment loading in the main tab host. When Instagram tries to load `fragment_clips` (Reels), it redirects to `fragment_direct_tab` (DMs).
 
 ### Network Blocking
-Hooks into `TigonServiceLayer` (a named, non-obfuscated class) and blocks requests to `/feed/timeline/`, `/discover/topical_explore`, and `/clips/discover`.
+Hooks into `TigonServiceLayer` (a named, non-obfuscated class) and blocks requests to `/feed/timeline/` and `/discover/topical_explore`.
 
 ## Updating for New Instagram Versions
 
 I'll update this project to support new Instagram versions as they are released. When a new version comes out, I'll apply the necessary patches and release an updated APK.
 
-To apply patches to a new Instagram version yourself:
+1. TigonServiceLayer is a named class (doesn't change).
 
-1. Find IgTabHostFragmentFactory:
-   ```bash
-   grep -rl '"fragment_clips"' instagram_source/smali*/
-   ```
-
-2. TigonServiceLayer is a named class (doesn't change).
-
-3. Apply the same patches.
+2. Apply the same patches.
 
 
 ## Contributing
