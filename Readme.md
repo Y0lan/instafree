@@ -17,6 +17,13 @@
 
 ---
 
+
+<p align="center">
+  <img src="docs/screen_1.png" alt="FeurStagram screenshot 1" width="240" />
+  <img src="docs/screen_2.png" alt="FeurStagram screenshot 2" width="240" />
+  <img src="docs/screen_3.png" alt="FeurStagram screenshot 3" width="240" />
+</p>
+
 A patching toolkit that removes addictive features from Instagram while keeping essential functionality.
 
 I built this project for myself as an alternative to [DFInstagram](https://www.distractionfreeapps.com/) which hasn't been maintained for a long time and was difficult to update. I'm sharing it so others can do the same for themselves.
