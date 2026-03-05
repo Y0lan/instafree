@@ -48,7 +48,7 @@ You have two options:
 ## What Still Works
 
 | Feature | Status |
-|---------|--------|--------|
+|---------|--------|
 | **Stories** | ✅ Works |
 | **Direct Messages** | ✅ Works |
 | **Profile** | ✅ Works |
