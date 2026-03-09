@@ -28,19 +28,21 @@ You have two options:
 
 | Feature | Status | How |
 |---------|--------|-----|
-| **Feed Posts** | Blocked | Network-level blocking |
+| **Feed Posts** | Blocked | No stories or posts shown from the homepage feed |
 | **Explore Content** | Blocked | Network-level blocking |
-| **Reels Content** | Redirected | Redirects to DMs |
+| **Reels Tab** | Redirected | Reels tab sends you to the DM page |
+| **Stories Tray** | Blocked | Stories tray removed from the homepage |
 
 ## What Still Works
 
 | Feature | Status |
 |---------|--------|
-| **Stories** | Works |
-| **Direct Messages** | Works |
-| **Profile** | Works |
-| **Reels in DMs** | Works |
-| **Search** | Works |
+| **Direct Messages** | All DM features work |
+| **Stories from DMs** | Access friends' stories from the DM page |
+| **Profile** | View your own stories and posts from your profile page |
+| **Posting Stories** | You can post stories normally |
+| **Reels in DMs** | Reels shared via DMs still play |
+| **Search** | Searching for users works |
 | **Notifications** | Works |
 
 ## Requirements
