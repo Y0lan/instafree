@@ -115,7 +115,7 @@ const marqueeItems = [
   "No reels",
   "No doomscrolling",
   "Keep DMs",
-  "Keep stories",
+  "No stories tray",
   "Keep profile",
   "Open source",
   "Free forever",
@@ -147,13 +147,13 @@ export default function App() {
           />
 
           {/* ASCII Title */}
-          <div className="w-full h-32 sm:h-40 relative">
+          <div className="w-full h-36 sm:h-48 relative">
             <ASCIIText
               text="InstaFree"
-              asciiFontSize={6}
-              textFontSize={160}
+              asciiFontSize={5}
+              textFontSize={120}
               textColor="#10a37f"
-              planeBaseHeight={6}
+              planeBaseHeight={5}
               enableWaves={true}
             />
           </div>
@@ -162,7 +162,7 @@ export default function App() {
             Instagram without the addiction.
             <br />
             <span className="text-foreground/80">
-              Keep messaging. Keep stories. Kill the feed.
+              Keep messaging. Hide stories. Kill the feed.
             </span>
           </p>
 
