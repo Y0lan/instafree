@@ -1,11 +1,11 @@
-.class public Lcom/feurstagram/FeurConfig;
+.class public Lcom/instafree/InstaFreeConfig;
 .super Ljava/lang/Object;
 
-# FeurStagram Configuration
+# InstaFree Configuration
 # Hardcoded settings for distraction-free mode
-# 
-# Disables: Feed content, Explore content, Reels content
-# Keeps: Stories, DMs, Profile
+#
+# Disables: Feed content, Explore content, Reels content, Stories tray
+# Keeps: DMs, Profile, posting stories, viewing own stories from profile
 
 .method public constructor <init>()V
     .locals 0

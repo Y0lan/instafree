@@ -1,34 +1,21 @@
 <p align="center">
-  <img src="docs/app_icon.png" alt="FeurStagram Icon" width="128">
+  <img src="docs/app_icon.png" alt="InstaFree Icon" width="128">
 </p>
 
-<h1 align="center">FeurStagram</h1>
+<h1 align="center">InstaFree</h1>
 <p align="center">Distraction-Free Instagram</p>
 
 <p align="center">
   <a href="../../releases/latest">
-    <img src="https://img.shields.io/github/v/release/jean-voila/FeurStagram?style=for-the-badge&label=Download%20APK&color=10a37f" alt="Download APK">
+    <img src="https://img.shields.io/github/v/release/Y0lan/instafree?style=for-the-badge&label=Download%20APK&color=10a37f" alt="Download APK">
   </a>
-</p>
-
-<p align="center">
-  <img src="https://komarev.com/ghpvc/?username=jean-voila-feurstagram&label=Views&color=gray&style=flat" alt="Views">
 </p>
 
 ---
 
-
-<p align="center">
-  <img src="docs/screen_1.png" alt="FeurStagram screenshot 1" width="240" />
-  <img src="docs/screen_2.png" alt="FeurStagram screenshot 2" width="240" />
-  <img src="docs/screen_3.png" alt="FeurStagram screenshot 3" width="240" />
-</p>
-
 A patching toolkit that removes addictive features from Instagram while keeping essential functionality.
 
-I built this project for myself as an alternative to [DFInstagram](https://www.distractionfreeapps.com/) which hasn't been maintained for a long time and was difficult to update. I'm sharing it so others can do the same for themselves.
-
-**This project is entirely free and open-source.** Feel free to fork, copy, enhance, or submit pull requests - do whatever you want with it!
+Based on [FeurStagram](https://github.com/jean-voila/FeurStagram) by [jean-voila](https://github.com/jean-voila).
 
 ## Installation
 
@@ -41,20 +28,20 @@ You have two options:
 
 | Feature | Status | How |
 |---------|--------|-----|
-| **Feed Posts** | ❌ Blocked | Network-level blocking |
-| **Explore Content** | ❌ Blocked | Network-level blocking |
-| **Reels Content** | ❌ Redirected | Redirects to DMs |
+| **Feed Posts** | Blocked | Network-level blocking |
+| **Explore Content** | Blocked | Network-level blocking |
+| **Reels Content** | Redirected | Redirects to DMs |
 
 ## What Still Works
 
 | Feature | Status |
 |---------|--------|
-| **Stories** | ✅ Works |
-| **Direct Messages** | ✅ Works |
-| **Profile** | ✅ Works |
-| **Reels in DMs** | ✅ Works |
-| **Search** | ✅ Works |
-| **Notifications** | ✅ Works |
+| **Stories** | Works |
+| **Direct Messages** | Works |
+| **Profile** | Works |
+| **Reels in DMs** | Works |
+| **Search** | Works |
+| **Notifications** | Works |
 
 ## Requirements
 
@@ -80,7 +67,7 @@ brew install apktool android-commandlinetools openjdk python3
 
 3. **Install the patched APK:**
    ```bash
-   adb install -r feurstagram_patched.apk
+   adb install -r instafree_patched.apk
    ```
 
 4. **Cleanup build artifacts:**
@@ -91,14 +78,14 @@ brew install apktool android-commandlinetools openjdk python3
 ## File Structure
 
 ```
-Feurstagram/
-├── patch.sh                 # Main patching script
-├── cleanup.sh               # Removes build artifacts
-├── apply_network_patch.py   # Network hook patch logic
-├── feurstagram.keystore     # Signing keystore (password: android)
+instafree/
+├── patch.sh                    # Main patching script
+├── cleanup.sh                  # Removes build artifacts
+├── apply_network_patch.py      # Network hook patch logic
+├── instafree.keystore          # Signing keystore (password: android)
 └── patches/
-    ├── FeurConfig.smali     # Configuration class
-    └── FeurHooks.smali      # Network blocking hooks
+    ├── InstaFreeConfig.smali   # Configuration class
+    └── InstaFreeHooks.smali    # Network blocking hooks
 ```
 
 ## Keystore
@@ -107,21 +94,21 @@ The patched APK needs to be signed before installation. The patcher uses a keyst
 
 ### Generating a Keystore
 
-If `feurstagram.keystore` doesn't exist, create one:
+If `instafree.keystore` doesn't exist, create one:
 
 ```bash
-keytool -genkey -v -keystore feurstagram.keystore -alias feurstagram \
+keytool -genkey -v -keystore instafree.keystore -alias instafree \
   -keyalg RSA -keysize 2048 -validity 10000 \
   -storepass android -keypass android \
-  -dname "CN=Feurstagram, OU=Feurstagram, O=Feurstagram, L=Unknown, ST=Unknown, C=XX"
+  -dname "CN=InstaFree, OU=InstaFree, O=InstaFree, L=Unknown, ST=Unknown, C=XX"
 ```
 
 ### Keystore Details
 
 | Property | Value |
 |----------|-------|
-| Filename | `feurstagram.keystore` |
-| Alias | `feurstagram` |
+| Filename | `instafree.keystore` |
+| Alias | `instafree` |
 | Password | `android` |
 | Algorithm | RSA 2048-bit |
 | Validity | 10,000 days |
@@ -132,7 +119,7 @@ keytool -genkey -v -keystore feurstagram.keystore -alias feurstagram \
 
 View logs to see what's being blocked:
 ```bash
-adb logcat -s "Feurstagram:D"
+adb logcat -s "InstaFree:D"
 ```
 
 ## How It Works
@@ -143,31 +130,9 @@ Intercepts fragment loading in the main tab host. When Instagram tries to load `
 ### Network Blocking
 Hooks into `TigonServiceLayer` (a named, non-obfuscated class) and blocks requests to `/feed/timeline/` and `/discover/topical_explore`.
 
-## Updating for New Instagram Versions
+## Credits
 
-I'll update this project to support new Instagram versions as they are released. When a new version comes out, I'll apply the necessary patches and release an updated APK.
-
-1. TigonServiceLayer is a named class (doesn't change).
-
-2. Apply the same patches.
-
-
-## Contributing
-
-This is a personal project I'm sharing with the community. Contributions are welcome!
-
-- 🍴 **Fork it** - Make your own version
-- 🔧 **Pull requests** - Improvements and fixes are appreciated
-- 📋 **Copy it** - Use the code however you want
-- ✨ **Enhance it** - Build something even better
-
-## Donations
-
-If you find this project useful and want to support its development, you can send a donation via Bitcoin:
-
-**BTC:** `bc1qa0xyd9n0fy0hhk2mzg5g5zy8l7lc0t728f0jnq`
-
-Your support is greatly appreciated! 🙏
+This project is a fork of [FeurStagram](https://github.com/jean-voila/FeurStagram) by [jean-voila](https://github.com/jean-voila), originally released under the [Unlicense](https://unlicense.org).
 
 ## License
 
