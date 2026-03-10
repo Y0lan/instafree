@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Marquee, MarqueeContent, MarqueeItem, MarqueeFade } from "@/components/kibo-ui/marquee";
 import Lightning from "@/components/reactbits/Lightning";
 import ASCIIText from "@/components/reactbits/ASCIIText";
+import BlurText from "@/components/reactbits/BlurText";
+import Squares from "@/components/reactbits/Squares";
+import GlowCard from "@/components/GlowCard";
 import {
   Download,
   Github,
@@ -236,86 +238,104 @@ export default function App() {
         </Marquee>
       </div>
 
-      {/* What's blocked */}
-      <section className="py-24 px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16 space-y-4">
-            <Badge
-              variant="destructive"
-              className="text-xs tracking-wider uppercase px-4 py-1"
-            >
-              Blocked
-            </Badge>
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-              What gets removed
-            </h2>
-            <p className="text-muted-foreground text-lg max-w-md mx-auto">
-              The features designed to keep you scrolling
-            </p>
-          </div>
+      {/* Blocked + Working — unified section */}
+      <div className="relative overflow-hidden">
+        {/* Single Squares background spanning both sections */}
+        <div className="absolute inset-0">
+          <Squares
+            direction="diagonal"
+            speed={0.25}
+            borderColor="rgba(255,255,255,0.04)"
+            squareSize={44}
+            hoverFillColor="rgba(255,255,255,0.03)"
+          />
+        </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {blocked.map((item) => (
-              <Card
-                key={item.title}
-                className="bg-card/50 border-destructive/15 hover:border-destructive/30 transition-all duration-300 hover:-translate-y-1 group"
+        {/* What's blocked */}
+        <section className="pt-24 pb-16 px-6 relative z-10">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-16 space-y-4">
+              <Badge
+                variant="destructive"
+                className="text-xs tracking-wider uppercase px-4 py-1"
               >
-                <CardContent className="pt-6 space-y-4">
-                  <div className="w-12 h-12 rounded-xl bg-destructive/10 flex items-center justify-center group-hover:bg-destructive/20 transition-colors">
-                    <item.icon className="w-6 h-6 text-destructive" />
-                  </div>
-                  <div className="space-y-2">
-                    <h3 className="font-semibold text-lg">{item.title}</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
+                Blocked
+              </Badge>
+              <BlurText
+                text="What gets removed"
+                className="text-3xl sm:text-4xl font-bold tracking-tight"
+                delay={80}
+                direction="bottom"
+              />
+              <p className="text-muted-foreground text-lg max-w-md mx-auto">
+                The features designed to keep you scrolling
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {blocked.map((item) => (
+                <GlowCard
+                  key={item.title}
+                  glowColor="rgba(239, 68, 68, 0.4)"
+                  className="rounded-lg"
+                >
+                  <div className="bg-card/40 backdrop-blur-sm border border-white/[0.04] rounded-lg p-5 h-full group hover:-translate-y-0.5 transition-transform duration-200">
+                    <div className="flex items-center gap-3 mb-3">
+                      <item.icon className="w-4 h-4 text-destructive shrink-0" />
+                      <h3 className="font-medium">{item.title}</h3>
+                    </div>
+                    <p className="text-sm text-muted-foreground leading-relaxed pl-7">
                       {item.desc}
                     </p>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
+                </GlowCard>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <div className="max-w-6xl mx-auto px-6">
-        <Separator className="opacity-30" />
+        <div className="max-w-6xl mx-auto px-6 relative z-10">
+          <Separator className="opacity-20" />
+        </div>
+
+        {/* What still works */}
+        <section className="pt-16 pb-24 px-6 relative z-10">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-16 space-y-4">
+              <Badge className="text-xs tracking-wider uppercase px-4 py-1 bg-primary/15 text-primary border-primary/20 hover:bg-primary/20">
+                Working
+              </Badge>
+              <BlurText
+                text="What still works"
+                className="text-3xl sm:text-4xl font-bold tracking-tight"
+                delay={80}
+                direction="bottom"
+              />
+              <p className="text-muted-foreground text-lg max-w-md mx-auto">
+                Everything you actually need
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {working.map((item) => (
+                <GlowCard
+                  key={item.title}
+                  glowColor="rgba(16, 163, 127, 0.4)"
+                  className="rounded-lg"
+                >
+                  <div className="bg-card/40 backdrop-blur-sm border border-white/[0.04] rounded-lg p-5 h-full group hover:-translate-y-0.5 transition-transform duration-200">
+                    <div className="flex items-center gap-3 mb-2">
+                      <item.icon className="w-4 h-4 text-primary shrink-0" />
+                      <h3 className="font-medium">{item.title}</h3>
+                    </div>
+                    <p className="text-sm text-muted-foreground pl-7">{item.desc}</p>
+                  </div>
+                </GlowCard>
+              ))}
+            </div>
+          </div>
+        </section>
       </div>
-
-      {/* What still works */}
-      <section className="py-24 px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16 space-y-4">
-            <Badge className="text-xs tracking-wider uppercase px-4 py-1 bg-primary/15 text-primary border-primary/20 hover:bg-primary/20">
-              Working
-            </Badge>
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-              What still works
-            </h2>
-            <p className="text-muted-foreground text-lg max-w-md mx-auto">
-              Everything you actually need
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {working.map((item) => (
-              <Card
-                key={item.title}
-                className="bg-card/50 border-primary/10 hover:border-primary/25 transition-all duration-300 hover:-translate-y-1 group"
-              >
-                <CardContent className="pt-6 space-y-4">
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                    <item.icon className="w-6 h-6 text-primary" />
-                  </div>
-                  <div className="space-y-1">
-                    <h3 className="font-semibold text-lg">{item.title}</h3>
-                    <p className="text-sm text-muted-foreground">{item.desc}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* How it works */}
       <section className="py-24 px-6 bg-secondary/20 border-y border-border/20">
