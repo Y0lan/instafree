@@ -100,20 +100,24 @@ patch_apk() {
     local OUTPUT_APK="$SCRIPT_DIR/instafree_patched.apk"
 
     # Step 1: Decompile
-    echo -e "\n${YELLOW}[1/6] Decompiling APK...${NC}"
+    echo -e "\n${YELLOW}[1/9] Decompiling APK...${NC}"
     rm -rf "$WORK_DIR"
     apktool d --no-res "$INPUT_APK" -o "$WORK_DIR"
     echo -e "${GREEN}✓ Decompiled${NC}"
 
     # Step 2: Copy InstaFree helper classes
-    echo -e "\n${YELLOW}[2/6] Adding InstaFree classes...${NC}"
+    echo -e "\n${YELLOW}[2/9] Adding InstaFree classes...${NC}"
     mkdir -p "$WORK_DIR/smali_classes17/com/instafree"
     cp "$PATCHES_DIR/InstaFreeConfig.smali" "$WORK_DIR/smali_classes17/com/instafree/"
     cp "$PATCHES_DIR/InstaFreeHooks.smali" "$WORK_DIR/smali_classes17/com/instafree/"
-    echo -e "${GREEN}✓ Added InstaFreeConfig.smali and InstaFreeHooks.smali${NC}"
+    cp "$PATCHES_DIR/InstaFreeRedirect.smali" "$WORK_DIR/smali_classes17/com/instafree/"
+    cp "$PATCHES_DIR/InstaFreeSettings.smali" "$WORK_DIR/smali_classes17/com/instafree/"
+    mkdir -p "$WORK_DIR/assets"
+    cp "$PATCHES_DIR/instafree_icon.png" "$WORK_DIR/assets/"
+    echo -e "${GREEN}✓ Added InstaFreeConfig.smali, InstaFreeHooks.smali, InstaFreeRedirect.smali, InstaFreeSettings.smali${NC}"
 
     # Step 3: Patch network layer...
-    echo -e "\n${YELLOW}[3/6] Patching network layer...${NC}"
+    echo -e "\n${YELLOW}[3/9] Patching network layer...${NC}"
     local TIGON_FILE="$WORK_DIR/smali/com/instagram/api/tigon/TigonServiceLayer.smali"
     if [ ! -f "$TIGON_FILE" ]; then
         echo -e "${RED}Error: TigonServiceLayer.smali not found${NC}"
@@ -123,18 +127,33 @@ patch_apk() {
     python3 "$SCRIPT_DIR/apply_network_patch.py" "$TIGON_FILE"
     echo -e "${GREEN}✓ Network hook patch applied${NC}"
 
-    # Step 4: Patch tab redirection
-    echo -e "\n${YELLOW}[4/6] Patching tab redirection (Global)...${NC}"
+    # Step 4: Initialize config system
+    echo -e "\n${YELLOW}[4/9] Initializing config system...${NC}"
+    python3 "$SCRIPT_DIR/patch_app_init.py" "$WORK_DIR"
+    echo -e "${GREEN}✓ Application.onCreate patched for config init${NC}"
+
+    # Step 5: Patch tab redirection
+    echo -e "\n${YELLOW}[5/9] Patching tab redirection (Global)...${NC}"
     python3 "$SCRIPT_DIR/global_redirect.py" "$WORK_DIR"
     echo -e "${GREEN}✓ Global tab redirection applied${NC}"
 
-    # Step 5: Build APK
-    echo -e "\n${YELLOW}[5/6] Building APK...${NC}"
+    # Step 6: Register settings activity in manifest
+    echo -e "\n${YELLOW}[6/9] Registering settings activity...${NC}"
+    python3 "$SCRIPT_DIR/patch_manifest.py" "$WORK_DIR/AndroidManifest.xml"
+    echo -e "${GREEN}✓ InstaFreeSettings registered in manifest${NC}"
+
+    # Step 7: Inject settings entry
+    echo -e "\n${YELLOW}[7/9] Injecting settings entry...${NC}"
+    python3 "$SCRIPT_DIR/inject_settings_entry.py" "$WORK_DIR"
+    echo -e "${GREEN}✓ Settings entry injected${NC}"
+
+    # Step 8: Build APK
+    echo -e "\n${YELLOW}[8/9] Building APK...${NC}"
     apktool b "$WORK_DIR" -o "$SCRIPT_DIR/instafree_unsigned.apk"
     echo -e "${GREEN}✓ APK built${NC}"
 
-    # Step 6: Sign APK
-    echo -e "\n${YELLOW}[6/6] Signing APK...${NC}"
+    # Step 9: Sign APK
+    echo -e "\n${YELLOW}[9/9] Signing APK...${NC}"
     "$ZIPALIGN" -f 4 "$SCRIPT_DIR/instafree_unsigned.apk" "$SCRIPT_DIR/instafree_aligned.apk"
     "$APKSIGNER" sign --ks "$KEYSTORE" --ks-pass "pass:$KEYSTORE_PASS" --out "$OUTPUT_APK" "$SCRIPT_DIR/instafree_aligned.apk"
 
@@ -156,7 +175,7 @@ usage() {
     echo ""
     echo "Patches an Instagram APK to create InstaFree (Distraction-Free Instagram)"
     echo ""
-    echo "Features disabled (via network blocking):"
+    echo "Features disabled (configurable via settings menu):"
     echo "  - Feed posts (Stories remain visible)"
     echo "  - Explore content"
     echo "  - Reels content"
@@ -166,6 +185,9 @@ usage() {
     echo "  - Direct Messages"
     echo "  - Profile"
     echo "  - Reels shared via DMs"
+    echo ""
+    echo "Settings menu:"
+    echo "  - In-app settings to toggle blocking per feature"
 }
 
 # Main
