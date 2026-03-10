@@ -4,11 +4,11 @@
 # InstaFree Network Hooks
 # Intercepts network requests and blocks unwanted content
 #
-# Blocked endpoints:
-#   - /feed/timeline/ (feed posts)
-#   - /discover/topical_explore (explore content)
-#   - /clips/discover (reels discovery)
-#   - /feed/reels_tray/ (stories tray - can still post & view own from profile)
+# Blocked endpoints (conditional via InstaFreeConfig):
+#   - /feed/timeline/ (feed posts) — conditional on isFeedDisabled()
+#   - /discover/topical_explore (explore content) — always blocked
+#   - /clips/discover (reels discovery) — conditional on isReelsDisabled()
+#   - /feed/reels_tray/ (stories tray) — conditional on isStoriesDisabled()
 #
 # Note: /clips/home/ is NOT blocked because the Reels tab is already
 #       redirected at the UI level - users can still view reels shared in DMs
@@ -70,29 +70,47 @@
 
     if-eqz v0, :cond_return
 
-    # Block feed timeline (posts) - Stories load separately from /feed/reels_tray/
+    # Block feed timeline (conditional on config)
+    invoke-static {}, Lcom/instafree/InstaFreeConfig;->isFeedDisabled()Z
+    move-result v2
+    if-eqz v2, :skip_feed
+
     const-string v1, "/feed/timeline/"
     invoke-virtual {v0, v1}, Ljava/lang/String;->contains(Ljava/lang/CharSequence;)Z
     move-result v2
     if-nez v2, :cond_block
 
-    # Block explore content
+    :skip_feed
+
+    # Block explore content (always blocked, no toggle)
     const-string v1, "/discover/topical_explore"
     invoke-virtual {v0, v1}, Ljava/lang/String;->contains(Ljava/lang/CharSequence;)Z
     move-result v2
     if-nez v2, :cond_block
 
-    # Block reels discovery
+    # Block reels discovery (conditional on config)
+    invoke-static {}, Lcom/instafree/InstaFreeConfig;->isReelsDisabled()Z
+    move-result v2
+    if-eqz v2, :skip_reels
+
     const-string v1, "/clips/discover"
     invoke-virtual {v0, v1}, Ljava/lang/String;->contains(Ljava/lang/CharSequence;)Z
     move-result v2
     if-nez v2, :cond_block
 
-    # Block stories tray (can still post & view own stories from profile)
+    :skip_reels
+
+    # Block stories tray (conditional on config)
+    invoke-static {}, Lcom/instafree/InstaFreeConfig;->isStoriesDisabled()Z
+    move-result v2
+    if-eqz v2, :skip_stories
+
     const-string v1, "/feed/reels_tray/"
     invoke-virtual {v0, v1}, Ljava/lang/String;->contains(Ljava/lang/CharSequence;)Z
     move-result v2
     if-nez v2, :cond_block
+
+    :skip_stories
 
     # Not blocked, return normally
     :cond_return
