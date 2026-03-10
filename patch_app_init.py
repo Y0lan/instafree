@@ -41,7 +41,7 @@ def patch_app_oncreate(filepath):
     # Find onCreate method and inject after super.onCreate() call
     # Pattern: .method public onCreate()V ... invoke-super ... -> onCreate
     oncreate_pattern = re.compile(
-        r'(\.method[^\n]*onCreate\(\)V.*?'
+        r'(\.method\s+public\s+onCreate\(\)V.*?'
         r'invoke-\w+\s+\{[^}]*\},[^\n]*onCreate\(\)V\s*\n)',
         re.DOTALL
     )

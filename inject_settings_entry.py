@@ -118,12 +118,27 @@ def inject_into_settings(source_dir):
     new-instance v1, Landroid/content/Intent;
     invoke-direct {{v1}}, Landroid/content/Intent;-><init>()V
     const-string v2, "com.instafree.InstaFreeSettings"
-    invoke-virtual {{v1, v2}}, Landroid/content/Intent;->setClassName(Ljava/lang/String;)Landroid/content/Intent;
+    invoke-virtual {{v1, p0, v2}}, Landroid/content/Intent;->setClassName(Landroid/content/Context;Ljava/lang/String;)Landroid/content/Intent;
 
     invoke-virtual {{v0, v1}}, Landroid/preference/Preference;->setIntent(Landroid/content/Intent;)V
 
     invoke-virtual {{{group_reg}, v0}}, Landroid/preference/PreferenceGroup;->addPreference(Landroid/preference/Preference;)Z
 '''
+
+    # Ensure target method has enough registers for our injected code (v0, v1, v2)
+    # Find the enclosing method's .locals declaration and bump it if needed
+    method_start = best_content.rfind('.method', 0, last_add)
+    if method_start != -1:
+        locals_match = re.search(r'\.locals\s+(\d+)', best_content[method_start:last_add])
+        if locals_match:
+            current_locals = int(locals_match.group(1))
+            if current_locals < 3:
+                locals_pos = method_start + locals_match.start()
+                locals_end = method_start + locals_match.end()
+                best_content = (best_content[:locals_pos]
+                               + f'.locals 3'
+                               + best_content[locals_end:])
+                print(f"  Bumped .locals from {current_locals} to 3")
 
     new_content = best_content[:last_add] + '\n' + inject_code + '\n' + best_content[last_add:]
 

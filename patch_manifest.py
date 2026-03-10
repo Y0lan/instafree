@@ -15,7 +15,7 @@ def patch_manifest(manifest_path):
         <activity
             android:name="com.instafree.InstaFreeSettings"
             android:label="InstaFree"
-            android:exported="true"
+            android:exported="false"
             android:theme="@android:style/Theme.DeviceDefault" />'''
 
     if '</application>' not in content:
