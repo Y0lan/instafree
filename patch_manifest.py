@@ -1,16 +1,31 @@
 #!/usr/bin/env python3
-"""Register InstaFreeSettings activity in AndroidManifest.xml."""
+"""Register InstaFreeSettings activity in AndroidManifest.xml.
+
+Handles both text XML and binary AXML manifests.
+- Text XML: modifies in place (inserts <activity> before </application>).
+- Binary AXML: uses axml_patcher to inject into the binary directly.
+"""
 import sys
+import os
 
-def patch_manifest(manifest_path):
-    with open(manifest_path, 'r') as f:
-        content = f.read()
+from axml_patcher import patch_manifest as patch_binary_manifest
 
+
+def _is_text_xml(data: bytes) -> bool:
+    """Check if data is a text XML manifest (not binary AXML)."""
+    try:
+        text = data.decode('utf-8')
+        return '<manifest' in text
+    except (UnicodeDecodeError, ValueError):
+        return False
+
+
+def _patch_text_manifest(manifest_path: str, content: str) -> bool:
+    """Patch a text XML manifest by inserting the activity tag."""
     if 'InstaFreeSettings' in content:
         print("  Already patched: AndroidManifest.xml")
         return True
 
-    # Insert before closing </application> tag
     activity_tag = '''
         <activity
             android:name="com.instafree.InstaFreeSettings"
@@ -31,6 +46,30 @@ def patch_manifest(manifest_path):
         f.write(content)
     print("  Registered InstaFreeSettings in AndroidManifest.xml")
     return True
+
+
+def _patch_binary_axml(manifest_path: str, data: bytes) -> bool:
+    """Patch a binary AXML manifest using the binary patcher."""
+    try:
+        patched = patch_binary_manifest(data, add_launcher=False)
+        with open(manifest_path, 'wb') as f:
+            f.write(patched)
+        print("  Registered InstaFreeSettings in AndroidManifest.xml (binary AXML)")
+        return True
+    except Exception as e:
+        print(f"  Error patching binary manifest: {e}")
+        return False
+
+
+def patch_manifest(manifest_path: str) -> bool:
+    with open(manifest_path, 'rb') as f:
+        data = f.read()
+
+    if _is_text_xml(data):
+        return _patch_text_manifest(manifest_path, data.decode('utf-8'))
+    else:
+        return _patch_binary_axml(manifest_path, data)
+
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:

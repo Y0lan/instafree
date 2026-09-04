@@ -10,11 +10,19 @@ import sys
 import os
 import re
 
+# Suppress androguard's loguru debug output before importing
+os.environ['LOGURU_LEVEL'] = 'ERROR'
+from androguard.core.axml import AXMLPrinter
+
 def find_application_class(source_dir):
     """Find the Application subclass by checking AndroidManifest.xml."""
     manifest = os.path.join(source_dir, 'AndroidManifest.xml')
-    with open(manifest, 'r') as f:
-        content = f.read()
+    with open(manifest, 'rb') as f:
+        data = f.read()
+
+    # Parse binary AXML manifest using androguard
+    axml = AXMLPrinter(data)
+    content = axml.get_xml().decode('utf-8')
 
     # Find android:name in <application> tag
     match = re.search(r'<application[^>]*android:name="([^"]+)"', content)
@@ -41,8 +49,8 @@ def patch_app_oncreate(filepath):
     # Find onCreate method and inject after super.onCreate() call
     # Pattern: .method public onCreate()V ... invoke-super ... -> onCreate
     oncreate_pattern = re.compile(
-        r'(\.method\s+public\s+onCreate\(\)V.*?'
-        r'invoke-\w+\s+\{[^}]*\},[^\n]*onCreate\(\)V\s*\n)',
+        r'(\.method\s+public\s+(?:final\s+)?onCreate\(\)V.*?'
+        r'invoke-\w+(?:/range)?\s+\{[^}]*\},[^\n]*onCreate\(\)V\s*\n)',
         re.DOTALL
     )
 
@@ -51,9 +59,11 @@ def patch_app_oncreate(filepath):
         print(f"  Error: Could not find onCreate in {filepath}")
         return False
 
+    # Use invoke-static/range because p0 can be a high register
+    # (e.g., with .locals 52, p0 = v52 which exceeds invoke-static's v15 limit)
     inject = (
         '\n    # InstaFree: Initialize config with app context\n'
-        '    invoke-static {p0}, Lcom/instafree/InstaFreeConfig;->'
+        '    invoke-static/range {p0 .. p0}, Lcom/instafree/InstaFreeConfig;->'
         'init(Landroid/content/Context;)V\n\n'
     )
 

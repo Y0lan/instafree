@@ -8,11 +8,31 @@ import sys
 import os
 import re
 
-def add_launcher_shortcut(manifest_path):
-    """Fallback: add a launcher activity-alias for InstaFreeSettings."""
-    with open(manifest_path, 'r') as f:
-        content = f.read()
+from axml_patcher import patch_manifest as patch_binary_manifest
 
+
+def add_launcher_shortcut(manifest_path):
+    """Fallback: add a launcher activity-alias for InstaFreeSettings.
+
+    Handles both text XML and binary AXML manifests.
+    """
+    with open(manifest_path, 'rb') as f:
+        data = f.read()
+
+    # Try text XML first
+    try:
+        content = data.decode('utf-8')
+        if '<manifest' in content:
+            return _add_shortcut_text(manifest_path, content)
+    except (UnicodeDecodeError, ValueError):
+        pass
+
+    # Binary AXML - use the binary patcher (add_launcher=True includes the alias)
+    return _add_shortcut_binary(manifest_path, data)
+
+
+def _add_shortcut_text(manifest_path, content):
+    """Add launcher shortcut to a text XML manifest."""
     if 'InstaFreeSettings' not in content:
         print("  Warning: InstaFreeSettings not in manifest, skipping shortcut")
         return False
@@ -43,6 +63,21 @@ def add_launcher_shortcut(manifest_path):
 
     print("  Added InstaFree Settings launcher shortcut (fallback)")
     return True
+
+
+def _add_shortcut_binary(manifest_path, data):
+    """Add launcher shortcut to a binary AXML manifest."""
+    try:
+        # patch_binary_manifest with add_launcher=True adds both
+        # activity and activity-alias (idempotent if activity already exists)
+        patched = patch_binary_manifest(data, add_launcher=True)
+        with open(manifest_path, 'wb') as f:
+            f.write(patched)
+        print("  Added InstaFree Settings launcher shortcut (binary AXML)")
+        return True
+    except Exception as e:
+        print(f"  Error adding launcher shortcut to binary manifest: {e}")
+        return False
 
 
 def inject_into_settings(source_dir):
