@@ -24,3 +24,7 @@ __pycache__/
 # Site build
 site/node_modules/
 site/dist/
+
+# Patcher tooling and intermediates
+tools/*.jar
+build/
