@@ -1,13 +1,20 @@
-import { motion } from 'motion/react';
+import { motion, type TargetAndTransition } from 'motion/react';
 import { useEffect, useRef, useState, useMemo } from 'react';
 
-const buildKeyframes = (from: Record<string, unknown>, steps: Record<string, unknown>[]) => {
+// Collapses the "from" snapshot and each step into one keyframe array per
+// animated property, which is the shape motion's `animate` prop expects.
+const buildKeyframes = (
+  from: TargetAndTransition,
+  steps: TargetAndTransition[]
+): TargetAndTransition => {
+  const read = (target: TargetAndTransition, key: string) =>
+    (target as Record<string, unknown>)[key];
   const keys = new Set([...Object.keys(from), ...steps.flatMap(s => Object.keys(s))]);
   const keyframes: Record<string, unknown[]> = {};
   keys.forEach(k => {
-    keyframes[k] = [from[k], ...steps.map(s => s[k])];
+    keyframes[k] = [read(from, k), ...steps.map(s => read(s, k))];
   });
-  return keyframes;
+  return keyframes as TargetAndTransition;
 };
 
 interface BlurTextProps {
@@ -18,8 +25,8 @@ interface BlurTextProps {
   direction?: 'top' | 'bottom';
   threshold?: number;
   rootMargin?: string;
-  animationFrom?: Record<string, unknown>;
-  animationTo?: Record<string, unknown>[];
+  animationFrom?: TargetAndTransition;
+  animationTo?: TargetAndTransition[];
   easing?: (t: number) => number;
   onAnimationComplete?: () => void;
   stepDuration?: number;

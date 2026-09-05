@@ -21,12 +21,18 @@ import {
   Compass,
   Film,
   Eye,
+  Megaphone,
+  UserPlus,
+  Activity,
+  ShoppingBag,
+  Link2,
 } from "lucide-react";
 
 interface ReleaseInfo {
   tag: string;
   date: string;
   url: string;
+  instagramVersion: string | null;
 }
 
 function useRelease() {
@@ -38,6 +44,8 @@ function useRelease() {
         const apk = data.assets?.find((a: { name: string }) =>
           a.name.endsWith(".apk")
         );
+        // Builds are named instafree_<instagram-version>.apk.
+        const stamped = apk?.name?.match(/^instafree[_-]v?(\d[\d.]*)\.apk$/i);
         setRelease({
           tag: data.tag_name,
           date: new Date(data.published_at).toLocaleDateString("en-US", {
@@ -48,6 +56,7 @@ function useRelease() {
           url:
             apk?.browser_download_url ||
             "https://github.com/Y0lan/instafree/releases/latest",
+          instagramVersion: stamped ? stamped[1] : null,
         });
       })
       .catch(() => {});
@@ -75,6 +84,26 @@ const blocked = [
     icon: Eye,
     title: "Stories Tray",
     desc: "The stories tray on the homepage is removed. Access stories from DMs or profiles instead.",
+  },
+  {
+    icon: Megaphone,
+    title: "Ads",
+    desc: "Sponsored units across the feed, stories, your profile, DMs and Explore never load.",
+  },
+  {
+    icon: UserPlus,
+    title: "Suggested Accounts",
+    desc: "No \"suggested for you\", no post-follow chaining, no friend recommendations.",
+  },
+  {
+    icon: Activity,
+    title: "Telemetry",
+    desc: "Client logging, post \"seen\" receipts and usage stats are dropped before they leave your phone.",
+  },
+  {
+    icon: ShoppingBag,
+    title: "Shopping",
+    desc: "Commerce and shopping preloads are blocked at the network level.",
   },
 ];
 
@@ -109,15 +138,22 @@ const working = [
     title: "Post Stories",
     desc: "Create and post stories as usual",
   },
+  {
+    icon: Link2,
+    title: "Deep Links",
+    desc: "Shared links open their post, not the feed",
+  },
 ];
 
 const marqueeItems = [
   "No feed",
   "No explore",
   "No reels",
+  "No ads",
   "No doomscrolling",
   "Keep DMs",
   "No stories tray",
+  "No tracking",
   "Keep profile",
   "Open source",
   "Free forever",
@@ -197,6 +233,15 @@ export default function App() {
               </Button>
             </a>
           </div>
+
+          {release?.instagramVersion && (
+            <p className="text-sm text-muted-foreground -mt-4">
+              Patched from Instagram{" "}
+              <span className="text-foreground/80 font-medium">
+                {release.instagramVersion}
+              </span>
+            </p>
+          )}
 
           <p className="text-sm text-muted-foreground">
             Based on{" "}
@@ -345,7 +390,7 @@ export default function App() {
               How it works
             </h2>
             <p className="text-muted-foreground text-lg">
-              Two surgical patches. Nothing else changes.
+              Three surgical patches. Nothing else changes.
             </p>
           </div>
 
@@ -391,6 +436,21 @@ export default function App() {
                     fragment_direct_tab
                   </code>{" "}
                   (DMs).
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-6">
+              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center text-primary font-bold text-sm border border-primary/20">
+                3
+              </div>
+              <div className="space-y-2 pt-1">
+                <h3 className="font-semibold text-lg">Deep Links</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  Instagram checks its own signing certificate before opening a
+                  shared link, so a re-signed build used to drop every link to
+                  the home feed. InstaFree makes that check pass, and shared
+                  posts, reels and profiles open where they should.
                 </p>
               </div>
             </div>
