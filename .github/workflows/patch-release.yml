@@ -1,0 +1,133 @@
+name: Patch Instagram APK
+
+# Patches a stock Instagram APK into an InstaFree build.
+#
+# APKMirror does not allow automated downloads, so the stock APK has to be
+# handed to the workflow. Either:
+#   - attach it to a GitHub release in this repo and pass that tag as
+#     `source_release`, or
+#   - pass any direct download link as `apk_url`.
+#
+# The patched APK is always uploaded as a workflow artifact. Set
+# `publish_tag` as well to attach it to a release.
+
+on:
+  workflow_dispatch:
+    inputs:
+      apk_url:
+        description: "Direct URL to a stock Instagram .apk or .apkm"
+        required: false
+        type: string
+      source_release:
+        description: "Tag of a release in this repo holding the stock APK"
+        required: false
+        type: string
+      publish_tag:
+        description: "Release tag to publish the patched APK to (leave empty to only build)"
+        required: false
+        type: string
+      prerelease:
+        description: "Publish as a prerelease"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Fetch the stock Instagram APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+          APK_URL: ${{ inputs.apk_url }}
+          SOURCE_RELEASE: ${{ inputs.source_release }}
+        run: |
+          set -euo pipefail
+          mkdir -p stock
+
+          if [ -n "$SOURCE_RELEASE" ]; then
+            gh release download "$SOURCE_RELEASE" \
+              --repo "$GITHUB_REPOSITORY" \
+              --pattern '*.apk' --pattern '*.apkm' --pattern '*.xapk' --pattern '*.apks' \
+              --dir stock
+          elif [ -n "$APK_URL" ]; then
+            # Keep the extension: patch.sh decides whether to merge splits from it.
+            name="$(basename "${APK_URL%%\?*}")"
+            case "$name" in
+              *.apk|*.apkm|*.xapk|*.apks) ;;
+              *) name="instagram.apk" ;;
+            esac
+            curl -fL --retry 4 --retry-delay 5 -o "stock/$name" "$APK_URL"
+          else
+            echo "::error::Provide either apk_url or source_release." >&2
+            exit 1
+          fi
+
+          ls -la stock
+          echo "STOCK_APK=$(ls stock/* | head -1)" >> "$GITHUB_ENV"
+
+      - name: Patch
+        env:
+          INSTAFREE_HEAP: 6g
+        run: |
+          set -euo pipefail
+          ./patch.sh "$STOCK_APK"
+          patched="$(ls -t instafree_*.apk | head -1)"
+          echo "PATCHED_APK=$patched" >> "$GITHUB_ENV"
+          echo "IG_VERSION=$(echo "$patched" | sed -E 's/^instafree_(.*)\.apk$/\1/')" >> "$GITHUB_ENV"
+
+      - name: Summarise
+        run: |
+          set -euo pipefail
+          sha="$(sha256sum "$PATCHED_APK" | cut -d' ' -f1)"
+          {
+            echo "### InstaFree build"
+            echo
+            echo "| | |"
+            echo "|---|---|"
+            echo "| APK | \`$PATCHED_APK\` |"
+            echo "| Instagram version | \`$IG_VERSION\` |"
+            echo "| Size | $(du -h "$PATCHED_APK" | cut -f1) |"
+            echo "| SHA256 | \`$sha\` |"
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "SHA256=$sha" >> "$GITHUB_ENV"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.PATCHED_APK }}
+          path: ${{ env.PATCHED_APK }}
+          retention-days: 30
+
+      - name: Publish to a release
+        if: ${{ inputs.publish_tag != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PUBLISH_TAG: ${{ inputs.publish_tag }}
+          PRERELEASE: ${{ inputs.prerelease }}
+        run: |
+          set -euo pipefail
+          notes="$(printf 'Patched from Instagram %s\n\nSHA256: `%s`\n' "$IG_VERSION" "$SHA256")"
+
+          if gh release view "$PUBLISH_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$PUBLISH_TAG" "$PATCHED_APK" --repo "$GITHUB_REPOSITORY" --clobber
+          else
+            flags=()
+            [ "$PRERELEASE" = "true" ] && flags+=(--prerelease)
+            gh release create "$PUBLISH_TAG" "$PATCHED_APK" \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "InstaFree $PUBLISH_TAG" \
+              --notes "$notes" \
+              "${flags[@]}"
+          fi
