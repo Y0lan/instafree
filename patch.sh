@@ -66,7 +66,10 @@ usage() {
 # --- Tool discovery ------------------------------------------------------
 
 fetch_jar() {
-    local name="$1" url="$2" want="$3" dest="$TOOLS_DIR/$name"
+    local name="$1" url="$2" want="$3"
+    # Declared separately: referring to `name` inside the same `local` reads as
+    # unset under `set -u`.
+    local dest="$TOOLS_DIR/$name"
 
     if [ -f "$dest" ]; then
         echo "$dest"
@@ -313,7 +316,9 @@ patch_apk() {
 while [ $# -gt 0 ]; do
     case "$1" in
         -h|--help) usage; exit 0 ;;
-        -o|--output) OUTPUT_APK="${2:-}"; shift 2 ;;
+        -o|--output)
+            [ -n "${2:-}" ] || fail "--output needs a filename"
+            OUTPUT_APK="$2"; shift 2 ;;
         --keep-work) KEEP_WORK=1; shift ;;
         --no-deeplinks) DEEPLINKS=0; shift ;;
         -*) fail "Unknown option: $1" ;;

@@ -1,30 +1,35 @@
 #!/bin/bash
 
 # InstaFree Cleanup Script
-# Removes all generated files after patching
+# Removes everything the patcher generates. Downloaded tools under tools/ are
+# kept, since they are pinned and reused across builds; delete that directory
+# by hand to force a re-download.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 echo "Cleaning up InstaFree build artifacts..."
 
-# Remove decompiled source
+# Decompiled source
 rm -rf "$SCRIPT_DIR/instagram_source"
 
-# Remove intermediate APKs
+# Merged bundles and intermediate APKs
+rm -rf "$SCRIPT_DIR/build"
+
+# Intermediate APKs from older runs
 rm -f "$SCRIPT_DIR/instafree_unsigned.apk"
 rm -f "$SCRIPT_DIR/instafree_aligned.apk"
 
-# Remove signature files
+# Signature sidecars
 rm -f "$SCRIPT_DIR"/*.idsig
 
-# Remove Python cache
+# Python cache
 rm -rf "$SCRIPT_DIR/__pycache__"
 find "$SCRIPT_DIR" -name "*.pyc" -delete
 
-# Remove macOS metadata
+# macOS metadata
 find "$SCRIPT_DIR" -name ".DS_Store" -delete
 
 echo "Cleanup complete"
-echo ""
-echo "Remaining files:"
-ls -la "$SCRIPT_DIR"
+echo
+echo "Patched APKs were left in place:"
+ls -1 "$SCRIPT_DIR"/instafree_*.apk 2>/dev/null || echo "  (none)"
