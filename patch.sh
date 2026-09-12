@@ -152,9 +152,33 @@ resolve_build_tools() {
         APKSIGNER="$(command -v apksigner)"
         return 0
     fi
-    fail "Android build-tools not found (need zipalign and apksigner).
-  Linux: sudo apt install zipalign apksigner
-  macOS: brew install android-commandlinetools && sdkmanager 'build-tools;35.0.0'"
+
+    # Last resort: fetch a pinned Linux build-tools zip (used by CI).
+    local bt_dir="$TOOLS_DIR/build-tools-r35"
+    if [ -x "$bt_dir/zipalign" ] && [ -e "$bt_dir/apksigner" ]; then
+        ZIPALIGN="$bt_dir/zipalign"
+        APKSIGNER="$bt_dir/apksigner"
+        return 0
+    fi
+    command -v unzip >/dev/null 2>&1 || fail "unzip not found (needed to unpack Android build-tools)."
+    command -v curl >/dev/null 2>&1 || fail "curl not found (needed to fetch Android build-tools)."
+    mkdir -p "$TOOLS_DIR"
+    local bt_zip="$TOOLS_DIR/build-tools_r35_linux.zip"
+    info "  Downloading Android build-tools r35" >&2
+    curl -fsSL --retry 3 -o "$bt_zip" "https://dl.google.com/android/repository/build-tools_r35_linux.zip" \
+        || fail "Could not download Android build-tools."
+    local unpacked="$TOOLS_DIR/build-tools-r35-unpacked"
+    rm -rf "$unpacked"
+    unzip -q "$bt_zip" -d "$unpacked"
+    local found
+    found="$(find "$unpacked" -name zipalign -type f | head -1)"
+    [ -n "$found" ] || fail "zipalign missing from the downloaded build-tools zip."
+    mkdir -p "$bt_dir"
+    cp -a "$(dirname "$found")/." "$bt_dir/"
+    chmod +x "$bt_dir/zipalign" "$bt_dir/apksigner" 2>/dev/null || true
+    rm -rf "$unpacked" "$bt_zip"
+    ZIPALIGN="$bt_dir/zipalign"
+    APKSIGNER="$bt_dir/apksigner"
 }
 
 check_dependencies() {
@@ -250,24 +274,34 @@ next_smali_dir() {
 patch_apk() {
     local source_apk="$1"
 
-    info "\n[1/6] Decompiling APK..."
+    info "\n[1/8] Decompiling APK..."
     rm -rf "$WORK_DIR"
     run_apktool d --no-res -f "$source_apk" -o "$WORK_DIR" >/dev/null
     preserve_uncompressed_libs "$source_apk"
     ok "✓ Decompiled"
 
-    info "\n[2/6] Adding InstaFree classes..."
+    info "\n[2/8] Adding InstaFree classes..."
     local smali_dir
     smali_dir="$(next_smali_dir)"
     mkdir -p "$smali_dir/com/instafree"
-    cp "$PATCHES_DIR/InstaFreeConfig.smali" "$PATCHES_DIR/InstaFreeHooks.smali" "$smali_dir/com/instafree/"
-    ok "✓ Added InstaFreeConfig and InstaFreeHooks to $(basename "$smali_dir")"
+    cp "$PATCHES_DIR/InstaFreeConfig.smali" \
+       "$PATCHES_DIR/InstaFreeHooks.smali" \
+       "$PATCHES_DIR/InstaFreeRedirect.smali" \
+       "$PATCHES_DIR/InstaFreeSettings.smali" \
+       "$smali_dir/com/instafree/"
+    mkdir -p "$WORK_DIR/assets"
+    cp "$PATCHES_DIR/instafree_icon.png" "$WORK_DIR/assets/"
+    ok "✓ Added InstaFree classes to $(basename "$smali_dir")"
 
-    info "\n[3/6] Patching network layer..."
+    info "\n[3/8] Patching network layer..."
     python3 "$SCRIPT_DIR/apply_network_patch.py" "$WORK_DIR" || fail "Network hook patch failed"
     ok "✓ Network hook applied"
 
-    info "\n[4/6] Redirecting the Reels tab..."
+    info "\n[4/8] Initializing config..."
+    python3 "$SCRIPT_DIR/patch_app_init.py" "$WORK_DIR" || fail "Application.onCreate patch failed"
+    ok "✓ InstaFreeConfig.init hooked"
+
+    info "\n[5/8] Redirecting the Reels tab..."
     python3 "$SCRIPT_DIR/global_redirect.py" "$WORK_DIR" || fail "Reels redirection failed"
     if [ "$DEEPLINKS" -eq 1 ]; then
         python3 "$SCRIPT_DIR/apply_signature_bypass.py" "$WORK_DIR" || fail "Signature bypass failed"
@@ -276,11 +310,16 @@ patch_apk() {
     fi
     ok "✓ UI patches applied"
 
-    info "\n[5/6] Building APK..."
+    info "\n[6/8] Registering settings..."
+    python3 "$SCRIPT_DIR/patch_manifest.py" "$WORK_DIR/AndroidManifest.xml" || fail "Manifest patch failed"
+    python3 "$SCRIPT_DIR/inject_settings_entry.py" "$WORK_DIR" || echo "  Settings page injection skipped; launcher shortcut still applies"
+    ok "✓ InstaFree Settings registered"
+
+    info "\n[7/8] Building APK..."
     run_apktool b "$WORK_DIR" -o "$BUILD_DIR/instafree_unsigned.apk" >/dev/null
     ok "✓ APK built"
 
-    info "\n[6/6] Signing APK..."
+    info "\n[8/8] Signing APK..."
     local align_args=(-f 4) zipalign_usage
     zipalign_usage="$("$ZIPALIGN" 2>&1 || true)"
     if printf '%s' "$zipalign_usage" | grep -q -- '-P <pagesize'; then
@@ -335,7 +374,7 @@ mkdir -p "$BUILD_DIR"
 SOURCE_APK="$INPUT_APK"
 case "$INPUT_APK" in
     *.apkm|*.xapk|*.apks)
-        info "\n[0/6] Merging split bundle..."
+        info "\n[0/8] Merging split bundle..."
         SOURCE_APK="$(merge_bundle "$INPUT_APK")"
         ok "✓ Merged into $(basename "$SOURCE_APK")"
         ;;

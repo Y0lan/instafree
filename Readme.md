@@ -50,6 +50,8 @@ You have two options:
 | **Search** | Searching for users works |
 | **Notifications** | Works |
 | **Deep Links** | Shared links open their post instead of dropping to the feed |
+| **Share to Stories** | Other apps can still share straight into Stories |
+| **Settings** | Separate `InstaFree Settings` launcher icon |
 
 ## Requirements
 
@@ -125,10 +127,16 @@ instafree/
 ├── apply_network_patch.py      # Network hook injection
 ├── global_redirect.py          # Reels tab redirection
 ├── apply_signature_bypass.py   # Deep-link signature check bypass
+├── patch_app_init.py           # Application.onCreate → InstaFreeConfig.init
+├── patch_manifest.py           # Register InstaFree Settings
+├── inject_settings_entry.py    # Settings entry / launcher shortcut
+├── axml_patcher.py             # Binary AndroidManifest editor
 ├── instafree.keystore          # Signing keystore (password: android)
 └── patches/
-    ├── InstaFreeConfig.smali   # Configuration class
-    └── InstaFreeHooks.smali    # Network blocking rules
+    ├── InstaFreeConfig.smali
+    ├── InstaFreeHooks.smali
+    ├── InstaFreeRedirect.smali
+    └── InstaFreeSettings.smali
 ```
 
 ## Keystore

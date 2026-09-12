@@ -29,13 +29,11 @@ Both of these were ported into the smali toolkit rather than pulled in as code:
 - **The deep-link signature bypass.** Instagram checks its own signing
   certificate before following a link into its content, so a re-signed build
   dropped shared links to the home feed. Both projects force that check to pass.
+- **A settings page.** InstaFree ships `InstaFreeSettings` plus a launcher
+  shortcut. It does not clone FeurStagram's long-press Home-tab entry.
 
 ## What upstream has that InstaFree does not
 
-- **An in-app settings page** with per-surface toggles and a permanent lock.
-  `patches/InstaFreeConfig.smali` reads the same kind of `SharedPreferences`
-  keys, but nothing writes them and no UI is wired up, so the compiled-in
-  defaults are what actually apply.
 - **Feed-item filtering.** Ads and "suggested" units arrive inline inside the
   `/feed/timeline/` response, so no URL-level rule can catch them; upstream
   rewrites their type token during JSON parsing. InstaFree blocks the timeline

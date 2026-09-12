@@ -1,5 +1,9 @@
 # Build outputs
 *.apk
+*.apkm
+*.xapk
+*.apks
+stock/
 *.idsig
 
 # Decompiled source (generated during patching)
@@ -27,4 +31,6 @@ site/dist/
 
 # Patcher tooling and intermediates
 tools/*.jar
+tools/build-tools*
+tools/*.zip
 build/
